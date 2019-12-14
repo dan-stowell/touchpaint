@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/strict.dtd">
+
+<!-- courtesy https://www.nsftools.com/tips/MagneticPoetry.htm -->
+<!-- looks super-old and works great! -->
+
+<!--**************************************************************************-->
+<!--* Magnetic Poetry page by Julian Robichaux (www.nsftools.com),           *-->
+<!--* using the Generic Drag Demo code by Mike Hall (www.brainjar.com).      *-->
+<!--* If you're going to steal this code, please mention Mike and Julian,    *-->
+<!--* and abide by Mike's terms of use at http://www.brainjar.com/terms.asp  *-->
+<!--**************************************************************************-->
+
+<html>
+<head>
+<title>Magnetic Poetry</title>
+<style type="text/css">
+
+body {
+  font-family: Verdana, Arial, Helvetica, Sans-Serif; 
+  font-size: .9em; 
+  background-color: white;
+  color: black; 
+}
+
+.smallText {
+  font-size: .7em; 
+}
+
+</style>
+
+<script type="text/javascript">//<![CDATA[
+
+//*****************************************************************************
+// Do not remove this notice.
+//
+// Copyright 2001 by Mike Hall.
+// See http://www.brainjar.com for terms of use.
+//*****************************************************************************
+
+// Determine browser and version.
+
+function Browser() {
+
+  var ua, s, i;
+
+  this.isIE    = false;
+  this.isNS    = false;
+  this.version = null;
+
+  ua = navigator.userAgent;
+
+  s = "MSIE";
+  if ((i = ua.indexOf(s)) >= 0) {
+    this.isIE = true;
+    this.version = parseFloat(ua.substr(i + s.length));
+    return;
+  }
+
+  s = "Netscape6/";
+  if ((i = ua.indexOf(s)) >= 0) {
+    this.isNS = true;
+    this.version = parseFloat(ua.substr(i + s.length));
+    return;
+  }
+
+  // Treat any other "Gecko" browser as NS 6.1.
+
+  s = "Gecko";
+  if ((i = ua.indexOf(s)) >= 0) {
+    this.isNS = true;
+    this.version = 6.1;
+    return;
+  }
+}
+
+var browser = new Browser();
+
+// Global object to hold drag information.
+
+var dragObj = new Object();
+dragObj.zIndex = 0;
+
+function dragStart(event, id) {
+
+  var el;
+  var x, y;
+
+  // If an element id was given, find it. Otherwise use the element being
+  // clicked on.
+
+  if (id)
+    dragObj.elNode = document.getElementById(id);
+  else {
+    if (browser.isIE)
+      dragObj.elNode = window.event.srcElement;
+    if (browser.isNS)
+      dragObj.elNode = event.target;
+
+    // If this is a text node, use its parent element.
+
+    if (dragObj.elNode.nodeType == 3)
+      dragObj.elNode = dragObj.elNode.parentNode;
+  }
+
+  // Get cursor position with respect to the page.
+
+  if (browser.isIE) {
+    x = window.event.clientX + document.documentElement.scrollLeft
+      + document.body.scrollLeft;
+    y = window.event.clientY + document.documentElement.scrollTop
+      + document.body.scrollTop;
+  }
+  if (browser.isNS) {
+    x = event.clientX + window.scrollX;
+    y = event.clientY + window.scrollY;
+  }
+
+  // Save starting positions of cursor and element.
+
+  dragObj.cursorStartX = x;
+  dragObj.cursorStartY = y;
+  dragObj.elStartLeft  = parseInt(dragObj.elNode.style.left, 10);
+  dragObj.elStartTop   = parseInt(dragObj.elNode.style.top,  10);
+
+  if (isNaN(dragObj.elStartLeft)) dragObj.elStartLeft = 0;
+  if (isNaN(dragObj.elStartTop))  dragObj.elStartTop  = 0;
+
+  // Update element's z-index.
+
+  dragObj.elNode.style.zIndex = ++dragObj.zIndex;
+
+  // Capture mousemove and mouseup events on the page.
+
+  if (browser.isIE) {
+    document.attachEvent("onmousemove", dragGo);
+    document.attachEvent("onmouseup",   dragStop);
+    window.event.cancelBubble = true;
+    window.event.returnValue = false;
+  }
+  if (browser.isNS) {
+    document.addEventListener("mousemove", dragGo,   true);
+    document.addEventListener("mouseup",   dragStop, true);
+    event.preventDefault();
+  }
+}
+
+function dragGo(event) {
+
+  var x, y;
+
+  // Get cursor position with respect to the page.
+
+  if (browser.isIE) {
+    x = window.event.clientX + document.documentElement.scrollLeft
+      + document.body.scrollLeft;
+    y = window.event.clientY + document.documentElement.scrollTop
+      + document.body.scrollTop;
+  }
+  if (browser.isNS) {
+    x = event.clientX + window.scrollX;
+    y = event.clientY + window.scrollY;
+  }
+
+  // Move drag element by the same amount the cursor has moved.
+
+  dragObj.elNode.style.left = (dragObj.elStartLeft + x - dragObj.cursorStartX) + "px";
+  dragObj.elNode.style.top  = (dragObj.elStartTop  + y - dragObj.cursorStartY) + "px";
+
+  if (browser.isIE) {
+    window.event.cancelBubble = true;
+    window.event.returnValue = false;
+  }
+  if (browser.isNS)
+    event.preventDefault();
+}
+
+function dragStop(event) {
+
+  // Stop capturing mousemove and mouseup events.
+
+  if (browser.isIE) {
+    document.detachEvent("onmousemove", dragGo);
+    document.detachEvent("onmouseup",   dragStop);
+  }
+  if (browser.isNS) {
+    document.removeEventListener("mousemove", dragGo,   true);
+    document.removeEventListener("mouseup",   dragStop, true);
+  }
+}
+
+//*****************************************************************************
+// Everything below this line was added by Julian.
+// This sets up the words that will be on the page,
+// and draws them randomly on the screen
+//*****************************************************************************
+productList = new Array("Lotus", "Notes", "Domino", "IBM", "Websphere", "Microsoft", "Windows", "Sun", "Java", "Apple", "Mac");
+nounList = new Array("web", "site", "computer", "server", "program", "world", "technology", "rock", "trash", "mountain", "river", "dog", "banana", "advice");
+verbList = new Array("am", "are", "is", "do", "can", "could", "would", "give", "like", "love", "hate", "explodes", "pounds", "belongs", "needs", "takes", "rules", "bites", "care", "dump", "excites", "enrages");
+adjList = new Array("super", "wonderful", "terrible", "crappy", "intense", "superior", "last", "first", "large", "tiny", "slippery", "mean", "plain", "quaint");
+advList = new Array("poorly", "superbly", "incredibly", "terribly", "neatly", "already");
+miscList = new Array("I", "you", "me", "he", "she", "it", "my", "your", "not", "a", "an", "the", "some", "any", "none", "and", "but", "so", "with", "to", "against");
+wordList = productList.concat(nounList, verbList, adjList, advList, miscList);
+
+upperX = 700;
+upperY = 550;
+lowerX = 20;
+lowerY = 75;
+
+function writeWordList () {
+  
+  // iterate through the wordList Array and write each word to the page
+  // using the writeWord function
+  
+  for (i = 0; i < wordList.length; i++) {
+    writeWord(wordList[i], "#996633", "#ffffff");
+  }
+}
+
+function writeWord (word, backgroundColor, textColor) {
+  
+  // write a word in a random place on the screen, using the background
+  // and text colors that were passed (if any)
+  
+  var x = randomNumber(lowerX, upperX, 10);
+  var y = randomNumber(lowerY, upperY, 10);
+  
+  var colorStyle = "";
+  if (backgroundColor)
+    colorStyle += "background-color:" + backgroundColor + ";";
+  if (textColor)
+    colorStyle += "color:" + textColor + ";";
+
+  var wordHTML = "<div id=\"box" + i + "\" style=\"left:" + x + "px;top:" + y + "px;position:absolute;border:1px solid #000000;padding:1px 3px 1px 3px;cursor:move;" + colorStyle + "\" onmousedown=\"dragStart(event)\">" + word + "</div>";
+  //alert(wordHTML);
+  document.write(wordHTML);
+}
+
+function randomNumber (lower, upper, interval) {
+  
+  // create a pseudo-random number between the upper and lower values,
+  // at a given interval (if any). If you call randomNumber(10, 100, 10)
+  // for example, you will get a number back that is between 10 and 100,
+  // in intervals of 10 (10, 20, 30, etc.)
+  
+  rndNum = (Math.abs(Math.round(Math.random() * 100000))) % (upper - lower + 1);
+  if (interval)
+    rndNum -= (rndNum % Math.round(interval));
+  rndNum += lower;
+  return rndNum;
+}
+
+//]]></script>
+</head>
+<body>
+
+<!--**************************************************************************-->
+<!--* Make some draggable text at the top of the page.                       *-->
+<!--* Note that any text within the <div> area that has its own tag          *-->
+<!--* (like <b> or <a>) does not drag when selected, although the            *-->
+<!--* entire area drags when you drag any of the other text.                 *-->
+<!--* Also note that the image can drag separately from the text block,      *-->
+<!--* but wherever it is it also moves when the text block moves.            *-->
+<!--**************************************************************************-->
+<div id="pagetop" style="position:relative;left:0px;top:0px;cursor:move;" onmousedown="dragStart(event)">
+<b>Magnetic Poetry</b> <i>(based on code from <a href='http://www.brainjar.com'>BrainJar</a>)</i><br>
+Drag the words around to make your own poetry. Refresh this page to mix the words up randomly. Make sure you are using a current browser with JavaScript enabled. (this technique works with images too! <img src="icon_eek.gif" style="position:relative;left:0px;top:0px;cursor:move;" onmousedown="dragStart(event)"> )</div>
+
+<!--**************************************************************************-->
+<!--* Write the draggable word list to ramdom spots on the page              *-->
+<!--**************************************************************************-->
+<script language=JavaScript>
+  writeWordList();
+</script>
+
+<!--**************************************************************************-->
+<!--* Write a little draggable footer at the bottom of the page.             *-->
+<!--**************************************************************************-->
+<div id="pagebottom" class="smallText" style="position:absolute;left:350px;top:600px;cursor:move;" onmousedown="dragStart(event)">you are on the <a href='http://www.nsftools.com'>nsftools.com</a> site<br>
+<a href='http://www.nsftools.com/tips/JavaScriptTips.htm'>see more JavaScript tips</a>
+</div>
+
+</body>
+</html>
