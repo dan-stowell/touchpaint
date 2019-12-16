@@ -1,32 +1,39 @@
 <html>
-  <body>
-    <div id="drag-1" class="draggable">
-      eye
-  </div>
-  <div id="drag-2" class="draggable">
-leg  </div>
-  </body>
-  <style>
-    #drag-1, #drag-2 {
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
-      font-size: 2rem;
-      width: min-content;
-      /* min-height: 6.5em; */
-      margin: 10%;
-      background-color: #29e;
-      color: white;
-      /* border-radius: 0.75em; */
-      padding: 2%;
-      touch-action: none;
-      user-select: none;
-      -webkit-transform: translate(0px, 0px);
-              transform: translate(0px, 0px);
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-  <script>
-    // target elements with the "draggable" class
-    interact('.draggable')
+
+<body>
+	<div id="drag-1" class="draggable">
+		eye
+	</div>
+	<div id="drag-2" class="draggable">
+		leg </div>
+</body>
+<style>
+	#drag-1,
+	#drag-2 {
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+		font-size: 2rem;
+		width: min-content;
+		/* min-height: 6.5em; */
+		margin: 10%;
+		background-color: #29e;
+		color: white;
+		/* border-radius: 0.75em; */
+		padding: 2%;
+		touch-action: none;
+		user-select: none;
+		-webkit-transform: translate(0px, 0px);
+		transform: translate(0px, 0px);
+	}
+
+	#drag-2 {
+		background-color: #92e;
+	}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js">
+</script>
+<script>
+	// target elements with the "draggable" class
+    interact('#drag-1')
       .draggable({
         // enable inertial throwing
         inertia: true,
@@ -35,7 +42,33 @@ leg  </div>
           interact.modifiers.restrictRect({
             restriction: 'parent',
             endOnly: true
-          })
+          }),
+          interact.modifiers.snap({
+            targets: [
+              function (
+                // the x and y page coordinates,
+                x, y,
+                // the current interaction
+                interaction,
+                // the offset information with relativePoint if set
+                { x: offsetX, y: offsetY, relativePoint, index: relativePointIndex },
+                // the index of this function in the options.targets array
+                index) {
+                  let leg = document.getElementById('drag-2');
+                  let rect = leg.getBoundingClientRect();
+                  return {
+                    x: rect.left,
+                    y: rect.top,
+                    range: 100,
+                  }
+              }
+                ],
+            endOnly: true,
+            relativePoints: [
+              {x:1, y:0},
+            ],
+            // offset: 'self',
+          }),
         ],
         // enable autoScroll
         autoScroll: true,
@@ -62,5 +95,6 @@ leg  </div>
 
     // this is used later in the resizing and gesture demos
     window.dragMoveListener = dragMoveListener
-  </script>
+</script>
+
 </html>
