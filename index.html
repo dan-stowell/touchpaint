@@ -54,18 +54,46 @@
                 { x: offsetX, y: offsetY, relativePoint, index: relativePointIndex },
                 // the index of this function in the options.targets array
                 index) {
+                  let eye = document.getElementById('drag-1');
+                  let firstrect = eye.getBoundingClientRect();
                   let leg = document.getElementById('drag-2');
                   let rect = leg.getBoundingClientRect();
-                  return {
-                    x: rect.left,
-                    y: rect.top,
-                    range: 100,
+                  if (relativePointIndex === 0) {
+                    return {
+                      x: rect.left - firstrect.width,
+                      y: rect.top,
+                      range: 100,
+                    }
+                  } else if (relativePointIndex === 1) {
+                    return {
+                      x: rect.left - firstrect.width,
+                      y: rect.bottom,
+                      range: 100,
+                    }
+                  } else if (relativePointIndex === 2) {
+                    return {
+                      x: rect.right + firstrect.width,
+                      y: rect.top,
+                      range: 100,
+                    }
+                  } else if (relativePointIndex === 3) {
+                    return {
+                      x: rect.right + firstrect.width,
+                      y: rect.bottom,
+                      range: 100,
+                    }
+                  } else {
+                    console.error(`I don't know what to do with relativePointIndex ${relativePointIndex}, sorry`);
+                    return {x:0, y:0};
                   }
               }
                 ],
             endOnly: true,
             relativePoints: [
-              {x:1, y:0},
+              {x:0, y:0}, // 0 top left
+              {x:0, y:1}, // 1 bottom left
+              {x:1, y:0}, // 2 top right
+              {x:1, y:1}, // 3 bottom right
             ],
             // offset: 'self',
           }),
@@ -75,6 +103,10 @@
 
         // call this function on every dragmove event
         onmove: dragMoveListener,
+
+        onend: function(event) {
+          console.log(`onend ${event}`);
+        }
       })
 
     function dragMoveListener (event) {
